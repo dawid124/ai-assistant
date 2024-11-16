@@ -1,0 +1,13 @@
+.DS_Store
+.env
+evaluation_basics/.env
+.idea/
+node_modules/
+database/
+**/*.db
+.vscode/
+package-lock.json
+bun.lockb
+nocommit
+dist/
+*.log
