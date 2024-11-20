@@ -7,11 +7,14 @@ import aiAnswerPromptService from '../prompt/AiAnswerPromptService.ts';
 import dialogueManagerController from '../../controler/mqtt/DialogueManagerController.ts';
 import envProps from '../../property/PropertyManager.ts';
 import webSearchPromptService from '../prompt/WebSearchPromptService.ts';
-import aiCorrectionService from '../prompt/AiCorrectionService.ts';
 
 class IntentService {
-    public async recognize(msg: NluQueryMsg, afterAiCorrection: boolean) {
-        if (msg.input.indexOf('koniec') > -1 || msg.input.indexOf('przerwij') > -1) {
+    public async recognize(msg: NluQueryMsg) {
+        if (
+            msg.input.indexOf('koniec') > -1 ||
+            msg.input.indexOf('przerwij') > -1 ||
+            msg.input.indexOf('stop') > -1
+        ) {
             intentHandlingController.publishNluIntentNotRecognized(msg);
             return;
         }
@@ -26,19 +29,15 @@ class IntentService {
 
             console.log(`Chosen intent type: ${intentType as string}`);
 
-            await this.nextAction(intentType, msg, afterAiCorrection);
+            await this.nextAction(intentType, msg);
         } catch (er) {
             console.log(er);
             // intentHandlingController.publishNluIntentNotRecognized(msg);
-            await this.notRecognized(msg, afterAiCorrection);
+            this.notRecognized(msg);
         }
     }
 
-    private async nextAction(
-        intentType: EIntentType,
-        msg: NluQueryMsg,
-        afterAiCorrection: boolean
-    ): Promise<object> {
+    private async nextAction(intentType: EIntentType, msg: NluQueryMsg): Promise<void> {
         const query = {
             input: msg.input,
             sessionId: msg.sessionId,
@@ -58,7 +57,7 @@ class IntentService {
                 await this.webSearch(query);
                 break;
             case EIntentType.NOT_RECOGNIZED:
-                await this.notRecognized(query, afterAiCorrection);
+                this.notRecognized(query);
                 break;
             default:
                 throw new Error(`intentType: ${intentType as string} not implemented`);
@@ -131,11 +130,12 @@ class IntentService {
         });
     }
 
-    private async notRecognized(query: Query, afterAiCorrection: boolean) {
-        if (!afterAiCorrection) {
-            const newInput = await aiCorrectionService.correct(query.input);
-            await this.recognize({ ...query, input: newInput }, true);
-        } else if (query.customData === 'NOT_RECOGNIZED') {
+    private notRecognized(query: Query) {
+        // if (!afterAiCorrection) {
+        //     const newInput = await aiCorrectionService.correct(query.input);
+        //     await this.recognize({ ...query, input: newInput }, true);
+        // } else
+        if (query.customData === 'NOT_RECOGNIZED') {
             intentHandlingController.publishNluIntentNotRecognized(query);
             dialogueManagerController.publishEndSession({
                 siteId: query.siteId,

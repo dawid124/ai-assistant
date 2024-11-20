@@ -7,7 +7,7 @@ import openAIService from '../ai/OpenAIService.ts';
 
 const allowedDomains = [
     { name: 'Wikipedia', url: 'en.wikipedia.org', scrappable: true },
-    { name: 'Pogoda Interia', url: 'pogoda.interia.pl', scrappable: true },
+    { name: 'Pogoda Onet', url: 'pogoda.onet.pl', scrappable: true },
     { name: 'Filmy imdb', url: 'imdb.com', scrappable: true },
     { name: 'Filmy filmweb', url: 'filmweb.pl', scrappable: true },
     { name: 'wiadomosci onet', url: 'wiadomosci.onet.pl', scrappable: true },
@@ -256,7 +256,7 @@ ${JSON.stringify(
                 });
 
                 if (scrapeResult && scrapeResult.markdown) {
-                    console.log('scrapeResult:', scrapeResult);
+                    // console.log('scrapeResult:', scrapeResult);
                     return { url, content: scrapeResult.markdown };
                 } else {
                     console.warn(`No markdown content found for URL: ${url}`);

@@ -47,7 +47,7 @@ class IntentTypePrompt extends APromptService {
                   - NOT_RECOGNIZED - kompletnie niemożlwie do rozczytania 
                 - W ŻADNYM PRZYPADKU nie odpowiadaj innym typem niż określone.
                 - W ŻADNYM PRZYPADKU nie odpowiadaj więcej niż jednym typem.
-                - Podstawiając typy, dopasuj tekst najlepiej jak to możliwe, również gdy treść jest częściowo zniekształcona przez TTS.
+                - Podstawiając typy, dopasuj tekst najlepiej jak to możliwe, również gdy treść jest częściowo zniekształcona przez STT.
                 - Pomijaj lub ignoruj elementy, które nie wpływają na określenie typu z \`answer_type\`.
                 </prompt_rules>
                
@@ -68,6 +68,9 @@ class IntentTypePrompt extends APromptService {
                 SMART_HOME_ACTION
                 
                 więcej światła
+                SMART_HOME_ACTION
+                
+                Sena manual
                 SMART_HOME_ACTION
                 
                 Jaka jest aktualna pogoda w Warszawie
