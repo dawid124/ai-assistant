@@ -1,24 +1,29 @@
-export interface Query {
-    input: string;
+import type { MqttMessage } from '../../services/mqtt/Mqtt.service.ts';
+import type { MessageHistory } from '../../services/intent/Intent.interface.ts';
+
+export interface Query extends MqttMessage {
+    siteId: string;
+    sessionId: string;
+    input?: string;
+    id?: string;
+    customData?: MessageHistory[];
+}
+
+export interface ProcessingQuery extends MqttMessage {
     siteId: string;
     sessionId: string;
     id?: string;
-    customData?: string;
-}
-
-export interface NluQueryMsg extends Query {
-    intentFilter?: string[];
-    asrConfidence?: string;
+    customData: MessageHistory[];
 }
 
 export interface IntentNotRecognized extends Query {}
 
-export interface IntentRecognized extends Query {
-    intent: Intent;
+export interface Intent extends Query {
+    intent: IntentName;
     slots: Slot[];
 }
 
-export interface Intent {
+export interface IntentName {
     intentName: string;
     confidenceScore: number;
 }
@@ -40,14 +45,15 @@ export interface TtsSay {
 
 export interface DialogueEndSession {
     sessionId: string;
-    text: string;
-    customData?: string;
-    sendIntentNotRecognized: ?boolean;
+    text?: string;
+    customData?: MessageHistory[];
+    sendIntentNotRecognized?: boolean;
     intentFilter?: string[];
 }
 
 export interface DialogueContinueSession {
+    siteId: string;
     sessionId: string;
     text?: string;
-    customData?: string;
+    customData?: MessageHistory[];
 }

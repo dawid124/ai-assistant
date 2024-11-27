@@ -1,0 +1,68 @@
+[GetTime]
+która godzina
+
+[GetTemperature]
+jaka jest temperatura [w pokoju | w pomieszczeniu]
+
+[ChangeScene]
+scene_name = (noc:night | tiwi:tv | iwi:tv | manual:manual | czil:chill | chill:chill | warm:chill | łarm:chill chil:war | auto:auto | ałto:auto) {name}
+(scenę | scene | scena | szena) <scene_name>
+(ustaw | zmień ) (scenę | scene | scena | szena) [na] <scene_name>
+
+[ChangeSceneZone]
+scene_name = (noc:night | tiwi:tv | iwi:tv | manual:manual | czil:chill | chill:chill | warm:chill | łarm:chill chil:war | auto:auto | ałto:auto) {name}
+zone_id = (sypialni:bedroom | sypialnia:bedroom | salonie:floor1 | salon:floor1 | biurze:office | biuro:office) {zoneId}
+(ustaw | zmień ) (scenę | scene | scena | szena) na <scene_name> w <zone_id>
+
+[ChangeAllLight]
+percent = (0..100) {percent}
+[ustaw] [zmień] (oświetlenie | światło) [na] <percent> [procent]
+
+[ChangeIdLightOnOff]
+ioId = (TV:group-tv | przy tv:group-tv | iwi:group-tv | kuchni:group-kitchen | jadalni:group-dinner | jadalnia:group-dinner | ściana:group-wall) {ioId}
+mode = (wyłącz:off | zgaś:off | zapal:on | włącz:on) {mode}
+<mode> (oświetlenie | światło) [w] <ioId>
+
+[IncreaseLight]
+percent = (0..100) {percent}
+więcej światła {percent:10}
+zrób jaśniej {percent:25}
+(rozjaśnij | zwiększ) (oświetlenie | światło | światła | scenę) (){percent:20}
+
+[DecreaseLight]
+percent = (0..100) {percent}
+(mniej | miej) (światła | szatła) {percent:10}
+zrób ciemniej {percent:25}
+(przyciemnij | zmniejsz) (oświetlenie | światło | scenę) (){percent:20}
+
+[MoveBlind]
+percent= (1..100) {percent}
+[daj] rolety w (dół:DIM_DOWN| górę:DIM_UP){mode} {percent:33}
+[daj] rolety [o] <percent> w (dół:DIM_DOWN| górę:DIM_UP){mode}
+(przysłoń:DIM_DOWN) rolety {percent:33}
+(opuść:DIM_DOWN | podnieś:DIM_UP){mode} rolety {percent:50}
+(zasłoń:DIM_DOWN | odsłoń:DIM_UP){mode} rolety na maxa {percent:100}
+
+[MacroRun]
+otwórz (bramę | brame) {id:door-entry-gate-macro}
+otwórz (furtkę | furtke) {id:door-gateway-hold-macro}
+(Ustaw | Włącz) (cyrkulacje | wode) {id:hotWaterPump-5m-macro}
+
+macroId= (lajtowe:tv-spotify-play-lajtowe | polskie:tv-spotify-play-polskie | rap:tv-spotify-play-rap | hiphop:tv-spotify-play-rap | techno:tv-spotify-play-techno | trance:tv-spotify-play-trance | calssic trance:tv-spotify-play-classic-trance | party:tv-spotify-play-party) {id}
+(odpal | puść | włącz) [muzykę] <macroId>
+losowe odtwarzanie [dla] spotify {id:tv-spotify-random}
+(odpal | puść | włącz) [muzykę] {id:tv-spotify-play-lajtowe}
+
+wyłącz TV {id:tv-sleep}
+włącz TV {id:tv-wake-up}
+(włącz | odpal) [na tv] (kodi:tv-kodi | netflix:tv-netflix){id}
+(przycisz:tv-volume-down | podgłoś:tv-volume-up | wycisz:tv-volume-mute){id} (tv | telewizor)
+
+(wyłącz światła wszędzie | ustaw scenę auto wszędzie | ustaw auto w całym domu) {id:all-auto-macro}
+
+
+[Timer]
+minutes= (1..300) {minutes}
+ustaw (timer | minutnik | licznik) na <minutes> minut
+
+[Task]

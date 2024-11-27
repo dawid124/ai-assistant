@@ -1,21 +1,21 @@
-import openAIService, { EModel, type openAiResponseType } from '../ai/OpenAIService.ts';
+import OpenAIService, { EModel, type openAiResponseType } from '../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import OpenAI from 'openai';
 
-export abstract class APromptService {
+export abstract class AbstractPromptService {
     protected async askOpenAI(
         model: EModel,
         messages: ChatCompletionMessageParam[],
         responseType: openAiResponseType = { type: 'text' }
-    ): Promise<object> {
-        const response: OpenAI.Chat.Completions.ChatCompletion = await openAIService.completion(
+    ): Promise<string | null> {
+        const response: OpenAI.Chat.Completions.ChatCompletion = (await OpenAIService.completion(
             messages,
             model,
             false,
             responseType
-        );
+        )) as OpenAI.Chat.Completions.ChatCompletion;
 
-        if (!response || !response.choices || !response.choices.length === 0) {
+        if (!response || !response.choices) {
             throw new Error(`Answer from AI is empty model: ${model}`);
         }
 

@@ -2,8 +2,8 @@ import FirecrawlApp from '@mendable/firecrawl-js';
 import type OpenAI from 'openai';
 import { askDomainsPrompt, scoreResultsPrompt, selectResourcesToLoadPrompt } from './prompts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import envProps from '../../property/PropertyManager.ts';
-import openAIService from '../ai/OpenAIService.ts';
+import envProps from '../../property/Property.manager.ts';
+import OpenAIService from '../ai/OpenAI.service.ts';
 
 const allowedDomains = [
     { name: 'Wikipedia', url: 'en.wikipedia.org', scrappable: true },
@@ -40,7 +40,7 @@ class WebSearchService {
         };
 
         try {
-            const response = (await openAIService.completion(
+            const response = (await OpenAIService.completion(
                 [systemPrompt, userPrompt],
                 'gpt-4o',
                 false,
@@ -157,7 +157,7 @@ class WebSearchService {
         ${result.query}
         </query>`;
 
-                const response = (await openAIService.completion(
+                const response = (await OpenAIService.completion(
                     [
                         { role: 'system', content: scoreResultsPrompt },
                         { role: 'user', content: userMessage },
@@ -207,7 +207,7 @@ ${JSON.stringify(
         console.log('userPrompt:', userPrompt);
 
         try {
-            const response = (await openAIService.completion(
+            const response = (await OpenAIService.completion(
                 [systemPrompt, userPrompt],
                 'gpt-4o',
                 false,

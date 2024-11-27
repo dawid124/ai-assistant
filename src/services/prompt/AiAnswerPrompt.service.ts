@@ -1,12 +1,17 @@
-import { AiAPIType } from '../ai/types.ts';
-import envProps from '../../property/PropertyManager.ts';
-import { EModel } from '../ai/OpenAIService.ts';
-import { APromptService } from './APromptService.ts';
+import { AiAPIType } from '../ai/OpenAi.interface.ts';
+import envProps from '../../property/Property.manager.ts';
+import { EModel } from '../ai/OpenAI.service.ts';
+import { AbstractPromptService } from './AbstractPrompt.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { MessageHistory } from '../intent/Intent.interface.ts';
 
-class AiAnswerPromptService extends APromptService {
-    public async awswer(input: string, sessionId: string): Promise<string> {
-        const messages = [this.createSystemPrompt(), this.createMessage(input, sessionId)];
+class AiAnswerPromptService extends AbstractPromptService {
+    public async awswer(history?: MessageHistory[]): Promise<string | null> {
+        const messages: ChatCompletionMessageParam[] = [
+            this.createSystemPrompt(),
+            // @ts-expect-error correct role type mapping
+            ...history.map(item => ({ content: item.content, role: item.role })),
+        ];
 
         const aiAPIType: AiAPIType =
             (envProps.intent?.aiAnswerTypeApiModel as AiAPIType) || AiAPIType.GPT4_O_MINI;
@@ -19,10 +24,6 @@ class AiAnswerPromptService extends APromptService {
                 throw new Error(`INTENT_TYPE_AI_API_TYPE: ${aiAPIType as string} not implemented`);
         }
     }
-
-    private createMessage = (question: string): ChatCompletionMessageParam => {
-        return { content: question, role: 'user' };
-    };
 
     private createSystemPrompt = (): ChatCompletionMessageParam => {
         return {

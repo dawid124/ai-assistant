@@ -1,8 +1,8 @@
-import * as mqtt from 'mqtt';
-import intentHandlingController from '../../controler/mqtt/IntentHandlingController.ts';
-import envProps from '../../property/PropertyManager.ts';
+import mqtt, { type MqttClient } from 'mqtt';
+import intentHandlingController from '../../controler/mqtt/Intent.controller.ts';
+import envProps from '../../property/Property.manager.ts';
 
-interface MqttMessage {
+export interface MqttMessage {
     [key: string]: any;
 }
 
@@ -11,8 +11,8 @@ interface MqttCallback {
 }
 
 class MqttService {
-    private client: mqtt.Client | null;
-    private brokerUrl: string;
+    private client: MqttClient | null;
+    private brokerUrl: string = '';
 
     constructor() {
         this.client = null;
@@ -24,29 +24,32 @@ class MqttService {
 
         this.client.on('connect', () => {
             intentHandlingController.init();
-            console.log('Połączono z brokerem MQTT');
         });
 
         this.client.on('error', (error: Error) => {
-            console.error('Błąd połączenia MQTT:', error);
+            console.error('Error on MQTT connection:', error);
         });
     }
 
     public publish(topic: string, message: MqttMessage): void {
         if (!this.client) {
-            throw new Error('Klient MQTT nie jest połączony');
+            throw new Error('MQTT Client not connected');
         }
         this.client.publish(topic, JSON.stringify(message));
     }
 
     public subscribe(topic: string, callback: MqttCallback): void {
         if (!this.client) {
-            throw new Error('Klient MQTT nie jest połączony');
+            throw new Error('MQTT Client not connected');
         }
         this.client.subscribe(topic);
         this.client.on('message', (receivedTopic: string, message: Buffer) => {
             if (receivedTopic === topic) {
-                callback(JSON.parse(message.toString()));
+                try {
+                    callback(JSON.parse(message.toString()) as MqttMessage);
+                } catch (error) {
+                    console.error(`Error parsing msg on topic: "${receivedTopic}":`, error);
+                }
             }
         });
     }

@@ -1,8 +1,8 @@
-import mqttService from '../../services/mqtt/MqttService.ts';
-import envProps from '../../property/PropertyManager.ts';
+import mqttService from '../../services/mqtt/Mqtt.service.ts';
+import envProps from '../../property/Property.manager.ts';
 import type { DialogueContinueSession, DialogueEndSession } from './types.ts';
 
-export class DialogueManagerController {
+export class DialogueController {
     public init() {}
 
     public publishEndSession(msg: DialogueEndSession) {
@@ -14,4 +14,4 @@ export class DialogueManagerController {
     }
 }
 
-export default new DialogueManagerController();
+export default new DialogueController();

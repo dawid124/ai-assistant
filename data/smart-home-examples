@@ -1,0 +1,35 @@
+USER: przycisz tv
+AI:  { "intentName": "MacroRun",  "slots": [ {"entity": "id", "value": { "value": "tv-volume-down" } } ]}
+
+USER: wycisz tv
+AI:  { "intentName": "MacroRun",  "slots": [ {"entity": "id", "value": { "value": "tv-volume-mute" } } ]}
+
+USER: scena manual
+AI:  { "intentName": "ChangeScene",  "slots": [ {"entity": "name", "value": { "value": "manual" } } ]}
+
+USER: włącz scenę auto
+AI:  { "intentName": "ChangeScene",  "slots": [ {"entity": "name", "value": { "value": "auto" } } ]}
+
+USER: ustaw scenę chill
+AI:  { "intentName": "ChangeScene",  "slots": [ {"entity": "name", "value": { "value": "chill" } } ]}
+
+USER: scena chill
+AI:  { "intentName": "ChangeScene",  "slots": [ {"entity": "name", "value": { "value": "chill" } } ]}
+
+USER: jaka jest temperatura
+AI:  { "intentName": "GetTemperature",  "slots": [ ]}
+
+USER: wyłącz światło w jadalni
+AI:  { "intentName": "ChangeIdLightOnOff",  "slots": [ {"entity": "ioId", "value": { "value": "group-dinner" } } ]}
+
+USER: otwórz bramę
+AI:  { "intentName": "MacroRun",  "slots": [ {"entity": "id", "value": { "value": "door-entry-gate-macro" } } ]}
+
+USER: rozjaśnij światło o 30 procent
+AI:  { "intentName": "IncreaseLight",  ""slots"": [ {"entity": "percent", "value": { "value": 30 } } ]}
+
+USER: rolety w górę
+AI:  { "intentName": "MoveBlind",  ""slots"": [ {"entity": "percent", "value": { "value": 33 } }, {"entity": "mode", "value": { "value": "DIM_UP" } } ]}
+
+USER: rolety w dół
+AI:  { "intentName": "MoveBlind",  ""slots"": [ {"entity": "percent", "value": { "value": 33 } }, {"entity": "mode", "value": { "value": "DIM_DOWN" } } ]}

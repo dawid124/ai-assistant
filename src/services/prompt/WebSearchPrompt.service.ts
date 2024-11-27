@@ -1,5 +1,5 @@
-import webSearch from './WebSearch.ts';
-import openAIService from '../ai/OpenAIService.ts';
+import webSearch from './WebSearch.service.ts';
+import OpenAIService from '../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { answerPrompt } from './prompts.ts';
 import OpenAI, { ChatCompletion } from 'openai';
@@ -32,7 +32,7 @@ class WebSearchPromptService {
             { role: 'system', content: promptWithResults },
             { role: 'user', content: text } as ChatCompletionMessageParam[],
         ];
-        const completion: OpenAI.Chat.Completions.ChatCompletion = await openAIService.completion(
+        const completion: OpenAI.Chat.Completions.ChatCompletion = await OpenAIService.completion(
             allMessages,
             'gpt-4o',
             false
