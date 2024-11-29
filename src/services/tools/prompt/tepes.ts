@@ -1,4 +1,4 @@
-import type { Slot } from '../../controler/mqtt/types.ts';
+import type { Slot } from '../../../controler/mqtt/types.ts';
 
 export enum EIntentType {
     SMART_HOME_ACTION = 'SMART_HOME_ACTION',

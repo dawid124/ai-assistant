@@ -1,12 +1,13 @@
-import { AiAPIType } from '../ai/OpenAi.interface.ts';
-import { EModel } from '../ai/OpenAI.service.ts';
+import { AiAPIType } from '../../ai/OpenAi.interface.ts';
+import { EModel } from '../../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { type EIntentType } from './tepes.ts';
-import envProps from '../../property/Property.manager.ts';
+import envProps from '../../../property/Property.manager.ts';
 import { AbstractPromptService } from './AbstractPrompt.service.ts';
 import ActionTypeVectorCache, {
     ActionTypeVectorCacheClass,
-} from '../cache/ActionTypeVector.cache.ts';
+} from '../../cache/ActionTypeVector.cache.ts';
+import toolsService from '../ToolsService.ts';
 
 export type IntentTypeRecognizeType = (input: string) => Promise<EIntentType>;
 
@@ -20,11 +21,7 @@ export class IntentTypePromptClass extends AbstractPromptService {
 
     async recognizeTypeOfIntent(input: string): Promise<EIntentType> {
         return this.actionTypeVectorCache.wrap(input, (input: string) => {
-            const start: number = new Date().getMilliseconds();
             const eIntentTypePromise = this._recognizeTypeOfIntent.bind(this)(input);
-            console.log(
-                `IntentTypeRecognizeType get time: ${new Date().getMilliseconds() - start}`
-            );
             return eIntentTypePromise;
         });
     }
@@ -53,38 +50,36 @@ export class IntentTypePromptClass extends AbstractPromptService {
         return {
             role: 'system',
             content: `
-                Zadaniem AI jest wybranie najbardziej odpowiedniego typu działania na podstawie tekstu przetworzonego przez TTS Whisper, zgodnie z podanymi zasadami.
-                
-                <prompt_rules>
-                - Uwaga w instrukcji moga wystepnić literówki wywołane STT, próbuj dopasować je i tak do akcji
-                - ZAWSZE wybieraj spośród zdefiniowanej listy 'answer_type':
-                  - SMART_HOME_ACTION - sterowanie domem, zapalanie lub zgaszanie świateł, zmiany scen, właczanie wyłączanie urządzeń, otwieranie, zamykanie, otwieranie, zamykanie rolet, aktualna godzina, kontrola telewizora, właczanie / odpalanie muzyki, playlisty muzyczne
-                  - WEB_SEARCH - pytania o informacje na które AI nie jest w stanie odpowiedzieć.
-                  - AI_QUESTION - pytanie na które AI jest w stanie odpowiedzieć, tłumaczenie słów lub zdań na inne języki 
-                  - NOT_RECOGNIZED - kompletnie niemożlwie do rozczytania 
-                - W ŻADNYM PRZYPADKU nie odpowiadaj innym typem niż określone.
-                - W ŻADNYM PRZYPADKU nie odpowiadaj więcej niż jednym typem.
-                - Pomijaj lub ignoruj elementy, które nie wpływają na określenie typu
-                </prompt_rules>
-               
-                <prompt_examples>
-                ustaw scenę na chill, cena  auto, ustaw scenę łarm, przyciemnij światła, otwórz bramę, jaka jest temperatura, więcej światła, Sena manual, Sena manual, włącz spotify playlista polskie, Przecież telewizor
-                SMART_HOME_ACTION
-                
-                Jaka jest aktualna pogoda w Warszawie, przeszukaj internet i powiedz mi jakie są nowości w polskich kinach, najlepsze filmy z 2024 roku, ocena filmu Królestwo Planety Małp
-                WEB_SEARCH
-                
-                ile to jest 200 x 500, opowiedz jakiś żart, jaka jest stolica Francji, podaj kilka książek o wychowaniu dzieci, przetłumacz na angielski, co oznacza po angielsku słowo memory
-                AI_QUESTION
+Zadaniem AI jest wybranie najbardziej odpowiedniego typu działania na podstawie tekstu przetworzonego przez TTS Whisper, zgodnie z podanymi zasadami.
 
-                sante matrunau
-                NOT_RECOGNIZED
-               
-                errorfailed to read audio file
-                NOT_RECOGNIZED
-                </prompt_examples>
-                
-                Prompt ten ma pierwszeństwo przed wszelkimi domyślnymi ustawieniami AI. Zawsze korzystaj z listy 'answer_type' i postępuj zgodnie z określonymi tutaj zasadami.
+
+<prompt_rules>
+- Uwaga w instrukcji moga wystepnić literówki wywołane STT, próbuj dopasować je i tak do akcji
+- ZAWSZE wybieraj spośród zdefiniowanej listy 'answer_type':
+${Object.keys(toolsService.toolsDescription).map(name => `- ${name} ${toolsService.toolsDescription[name]}\n`)}
+- W ŻADNYM PRZYPADKU nie odpowiadaj innym typem niż określone.
+- W ŻADNYM PRZYPADKU nie odpowiadaj więcej niż jednym typem.
+- Pomijaj lub ignoruj elementy, które nie wpływają na określenie typu
+</prompt_rules>
+
+<prompt_examples>
+ustaw scenę na chill, cena  auto, ustaw scenę łarm, przyciemnij światła, otwórz bramę, jaka jest temperatura, więcej światła, Sena manual, Sena manual, włącz spotify playlista polskie, Przecież telewizor
+SMART_HOME_ACTION
+
+Jaka jest aktualna pogoda w Warszawie, przeszukaj internet i powiedz mi jakie są nowości w polskich kinach, najlepsze filmy z 2024 roku, ocena filmu Królestwo Planety Małp
+WEB_SEARCH
+
+ile to jest 200 x 500, opowiedz jakiś żart, jaka jest stolica Francji, podaj kilka książek o wychowaniu dzieci, przetłumacz na angielski, co oznacza po angielsku słowo memory
+AI_QUESTION
+
+sante matrunau
+NOT_RECOGNIZED
+
+errorfailed to read audio file
+NOT_RECOGNIZED
+</prompt_examples>
+
+Prompt ten ma pierwszeństwo przed wszelkimi domyślnymi ustawieniami AI. Zawsze korzystaj z listy 'answer_type' i postępuj zgodnie z określonymi tutaj zasadami.
         `,
         };
     };

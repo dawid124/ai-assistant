@@ -1,4 +1,4 @@
-import OpenAIService, { EModel, type openAiResponseType } from '../ai/OpenAI.service.ts';
+import OpenAIService, { EModel, type openAiResponseType } from '../../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import OpenAI from 'openai';
 

@@ -1,9 +1,9 @@
-import { AiAPIType } from '../ai/OpenAi.interface.ts';
-import envProps from '../../property/Property.manager.ts';
-import { EModel } from '../ai/OpenAI.service.ts';
+import { AiAPIType } from '../../ai/OpenAi.interface.ts';
+import envProps from '../../../property/Property.manager.ts';
+import { EModel } from '../../ai/OpenAI.service.ts';
 import { AbstractPromptService } from './AbstractPrompt.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import type { MessageHistory } from '../intent/Intent.interface.ts';
+import type { MessageHistory } from '../../intent/Intent.interface.ts';
 
 class AiAnswerPromptService extends AbstractPromptService {
     public async awswer(history?: MessageHistory[]): Promise<string | null> {

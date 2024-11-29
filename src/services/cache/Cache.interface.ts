@@ -1,6 +1,6 @@
 import type { IntentName, Slot } from '../../controler/mqtt/types.ts';
 import { EActionType } from '../intent/Intent.interface.ts';
-import type { EIntentType } from '../prompt/tepes.ts';
+import type { EIntentType } from '../tools/prompt/tepes.ts';
 
 export interface AppIntent {
     intent: IntentName;

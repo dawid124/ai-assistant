@@ -1,9 +1,9 @@
 import FirecrawlApp from '@mendable/firecrawl-js';
 import type OpenAI from 'openai';
-import { askDomainsPrompt, scoreResultsPrompt, selectResourcesToLoadPrompt } from './prompts';
+import { askDomainsPrompt, scoreResultsPrompt, selectResourcesToLoadPrompt } from './prompts.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import envProps from '../../property/Property.manager.ts';
-import OpenAIService from '../ai/OpenAI.service.ts';
+import envProps from '../../../property/Property.manager.ts';
+import OpenAIService from '../../ai/OpenAI.service.ts';
 
 const allowedDomains = [
     { name: 'Wikipedia', url: 'en.wikipedia.org', scrappable: true },

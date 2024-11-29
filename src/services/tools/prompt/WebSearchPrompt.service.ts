@@ -1,5 +1,5 @@
 import webSearch from './WebSearch.service.ts';
-import OpenAIService from '../ai/OpenAI.service.ts';
+import OpenAIService from '../../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { answerPrompt } from './prompts.ts';
 import OpenAI, { ChatCompletion } from 'openai';

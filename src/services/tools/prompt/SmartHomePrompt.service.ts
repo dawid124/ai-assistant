@@ -1,10 +1,10 @@
-import { AiAPIType } from '../ai/OpenAi.interface.ts';
-import envProps from '../../property/Property.manager.ts';
-import { EModel } from '../ai/OpenAI.service.ts';
+import { AiAPIType } from '../../ai/OpenAi.interface.ts';
+import envProps from '../../../property/Property.manager.ts';
+import { EModel } from '../../ai/OpenAI.service.ts';
 import { AbstractPromptService } from './AbstractPrompt.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { EAssistantRole, type MessageHistory } from '../intent/Intent.interface.ts';
-import UserDataService, { UserDataServiceClass } from '../data/UserData.service.ts';
+import { EAssistantRole, type MessageHistory } from '../../intent/Intent.interface.ts';
+import UserDataService, { UserDataServiceClass } from '../../data/UserData.service.ts';
 
 class SmartHomePromptService extends AbstractPromptService {
     private _userDataService: UserDataServiceClass;

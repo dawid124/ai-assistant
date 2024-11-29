@@ -1,8 +1,8 @@
 import envProps from '../../property/Property.manager.ts';
 import type { IActionTypeVectorCacheProps } from '../../property/Property.interface.ts';
 import VectorService, { type VectorServiceClass } from '../ai/Vector.service.ts';
-import type { EIntentType } from '../prompt/tepes.ts';
-import type { IntentTypeRecognizeType } from '../prompt/IntentTypePrompt.service.ts';
+import type { EIntentType } from '../tools/prompt/tepes.ts';
+import type { IntentTypeRecognizeType } from '../tools/prompt/IntentTypePrompt.service.ts';
 import type { CachedIntentType } from './Cache.interface.ts';
 
 export class ActionTypeVectorCacheClass {
@@ -20,15 +20,25 @@ export class ActionTypeVectorCacheClass {
     }
 
     async wrap(input: string, recognize: IntentTypeRecognizeType): Promise<EIntentType> {
-        if (!this.active) return await recognize(input);
+        if (!this.active) {
+            const start: number = new Date().valueOf();
+            const eIntentType = await recognize(input);
+            const end = new Date().valueOf();
+            console.log(`recognize get time: ${end - start}`);
+            return eIntentType;
+        }
 
-        const start: number = new Date().getMilliseconds();
+        let start: number = new Date().valueOf();
         const cachedIntentType = await this.get(input);
-        console.log(`ActionTypeVectorCache get time: ${new Date().getMilliseconds() - start}`);
+        let end = new Date().valueOf();
+        console.log(`ActionTypeVectorCache get time: ${end - start}`);
 
         if (cachedIntentType) return cachedIntentType;
 
+        start = new Date().valueOf();
         const intentType = await recognize(input);
+        end = new Date().valueOf();
+        console.log(`recognize get time: ${end - start}`);
 
         await this.add(input, intentType);
 
