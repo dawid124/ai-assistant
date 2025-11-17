@@ -1,5 +1,5 @@
 import webSearch from './WebSearch.service.ts';
-import OpenAIService from '../../ai/OpenAI.service.ts';
+import OpenAIService from '../../../ai/OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { answerPrompt } from './prompts.ts';
 import OpenAI, { ChatCompletion } from 'openai';
@@ -26,7 +26,6 @@ class WebSearchPromptService {
                 return scrapedItem ? { ...result, content: scrapedItem.content } : result;
             });
         }
-
         const promptWithResults = answerPrompt(mergedResults);
         const allMessages: ChatCompletionMessageParam[] = [
             { role: 'system', content: promptWithResults },

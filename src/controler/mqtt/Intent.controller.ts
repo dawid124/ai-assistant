@@ -5,7 +5,7 @@ import type { Intent, IntentNotRecognized, Query, TtsSay } from './types.ts';
 import { type AssistantAction, EActionType } from '../../services/intent/Intent.interface.ts';
 import dialogueManagerController from './Dialogue.controller.ts';
 
-export class IntentController {
+export class IntentControllerClass {
     private intentService: IntentServiceClass;
 
     constructor(intentService: IntentServiceClass) {
@@ -26,8 +26,8 @@ export class IntentController {
             case EActionType.END_SESSION_NEGATIVE:
                 dialogueManagerController.publishEndSession({
                     sessionId: action.sessionId,
-                    customData: action.history,
-                    text: action.output,
+                    customData: action.customData,
+                    text: action.output + ' :',
                 });
                 this.publishNluIntentNotRecognized({
                     input: action.input,
@@ -38,23 +38,17 @@ export class IntentController {
             case EActionType.END_SESSION_POSITIVE:
                 dialogueManagerController.publishEndSession({
                     sessionId: action.sessionId,
-                    customData: action.history,
-                    text: action.output,
+                    customData: action.customData,
+                    text: action.output + ' :',
                 });
-                this.publishNluIntentRecognized(action.intent as Intent);
-                this.publishIntentRecognized(action.intent as Intent);
                 break;
             case EActionType.CONTINUE_SESSION:
                 dialogueManagerController.publishContinueSession({
                     sessionId: action.sessionId,
                     siteId: action.siteId,
-                    text: action.output,
-                    customData: action.history,
+                    text: action.output + ' :',
+                    customData: action.customData,
                 });
-                break;
-            case EActionType.SMART_HOME_ACTION_REDIRECT:
-                this.publishNluIntentRecognized(action.intent as Intent);
-                this.publishIntentRecognized(action.intent as Intent);
                 break;
         }
     }
@@ -76,4 +70,4 @@ export class IntentController {
     }
 }
 
-export default new IntentController(IntentService);
+export default new IntentControllerClass(IntentService);

@@ -2,8 +2,11 @@ import FirecrawlApp from '@mendable/firecrawl-js';
 import type OpenAI from 'openai';
 import { askDomainsPrompt, scoreResultsPrompt, selectResourcesToLoadPrompt } from './prompts.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import envProps from '../../../property/Property.manager.ts';
-import OpenAIService from '../../ai/OpenAI.service.ts';
+import envProps from '../../../../property/Property.manager.ts';
+import OpenAIService from '../../../ai/OpenAI.service.ts';
+import { search, searchWithPages } from 'google-sr';
+import { NodeHtmlMarkdown } from 'node-html-markdown';
+import { load } from 'cheerio';
 
 const allowedDomains = [
     { name: 'Wikipedia', url: 'en.wikipedia.org', scrappable: true },
@@ -12,14 +15,17 @@ const allowedDomains = [
     { name: 'Filmy filmweb', url: 'filmweb.pl', scrappable: true },
     { name: 'wiadomosci onet', url: 'wiadomosci.onet.pl', scrappable: true },
     { name: 'wiadomosci tvn24', url: 'tvn24.pl', scrappable: true },
+    { name: 'pozostałe inforamcje', url: 'google.pl', scrappable: true },
 ];
 
 class WebSearchService {
     private allowedDomains: { name: string; url: string; scrappable: boolean }[];
     private apiKey: string;
     private firecrawlApp: FirecrawlApp;
+    private nhm: NodeHtmlMarkdown;
 
     constructor(allowedDomains: { name: string; url: string; scrappable: boolean }[]) {
+        this.nhm = new NodeHtmlMarkdown();
         this.allowedDomains = allowedDomains;
         this.apiKey = envProps.libs.friecrawlApiKey || '';
         this.firecrawlApp = new FirecrawlApp({ apiKey: this.apiKey });
@@ -40,12 +46,9 @@ class WebSearchService {
         };
 
         try {
-            const response = (await OpenAIService.completion(
-                [systemPrompt, userPrompt],
-                'gpt-4o',
-                false,
-                { type: 'json_object' }
-            )) as OpenAI.Chat.Completions.ChatCompletion;
+            const response = (await OpenAIService.completion([systemPrompt, userPrompt], 'gpt-4o', false, {
+                type: 'json_object',
+            })) as OpenAI.Chat.Completions.ChatCompletion;
 
             if (response.choices[0].message.content) {
                 const result = JSON.parse(response.choices[0].message.content);
@@ -70,49 +73,27 @@ class WebSearchService {
 
     async searchWeb(
         queries: { q: string; url: string }[]
-    ): Promise<
-        { query: string; results: { url: string; title: string; description: string }[] }[]
-    > {
+    ): Promise<{ query: string; results: { url: string; title: string; description: string }[] }[]> {
         console.log('Input (searchWeb):', queries);
         const searchResults = await Promise.all(
             queries.map(async ({ q, url }) => {
                 try {
                     // Add site: prefix to the query using domain
-                    const domain = new URL(url.startsWith('https://') ? url : `https://${url}`)
-                        .hostname;
-                    const siteQuery = `site:${domain} ${q}`;
+                    const domain = new URL(url.startsWith('https://') ? url : `https://${url}`).hostname;
+                    let siteQuery = `site:${domain} ${q}`;
 
-                    const response = await fetch('https://api.firecrawl.dev/v0/search', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${this.apiKey}`,
-                        },
-                        body: JSON.stringify({
-                            query: siteQuery,
-                            searchOptions: {
-                                limit: 3,
-                            },
-                            pageOptions: {
-                                fetchPageContent: false,
-                            },
-                        }),
-                    });
+                    if (url === 'google.com') siteQuery = q;
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
+                    const result = await search({ query: q });
 
                     console.log('siteQuery:', siteQuery);
                     console.log('result:', result);
 
-                    if (result.success && result.data && Array.isArray(result.data)) {
+                    if (Array.isArray(result)) {
                         return {
                             query: q,
-                            results: result.data.map((item: any) => ({
-                                url: item.url,
+                            results: result.map((item: any) => ({
+                                url: item.link,
                                 title: item.title,
                                 description: item.description,
                             })),
@@ -207,25 +188,17 @@ ${JSON.stringify(
         console.log('userPrompt:', userPrompt);
 
         try {
-            const response = (await OpenAIService.completion(
-                [systemPrompt, userPrompt],
-                'gpt-4o',
-                false,
-                { type: 'json_object' }
-            )) as OpenAI.Chat.Completions.ChatCompletion;
+            const response = (await OpenAIService.completion([systemPrompt, userPrompt], 'gpt-4o', false, {
+                type: 'json_object',
+            })) as OpenAI.Chat.Completions.ChatCompletion;
 
             if (response.choices[0].message.content) {
-                console.log(
-                    'response.choices[0].message.content:',
-                    response.choices[0].message.content
-                );
+                console.log('response.choices[0].message.content:', response.choices[0].message.content);
                 const result = JSON.parse(response.choices[0].message.content);
                 const selectedUrls = result.urls;
 
                 // Filter out URLs that aren't in the filtered results
-                const validUrls = selectedUrls.filter((url: string) =>
-                    filteredResults.some(r => r.url === url)
-                );
+                const validUrls = selectedUrls.filter((url: string) => filteredResults.some(r => r.url === url));
 
                 return validUrls;
             }
@@ -239,25 +212,32 @@ ${JSON.stringify(
 
     async scrapeUrls(urls: string[]): Promise<{ url: string; content: string }[]> {
         // Filter out URLs that are not scrappable based on allowedDomains
-        const scrappableUrls = urls.filter(url => {
-            const domain = new URL(url).hostname.replace(/^www\./, '');
-            console.log('domain:', domain);
-            const allowedDomain = this.allowedDomains.find(d => d.url === domain);
-            console.log('allowedDomain:', allowedDomain);
-            return allowedDomain && allowedDomain.scrappable;
-        });
+        // const scrappableUrls = urls.filter(url => {
+        //     const domain = new URL(url).hostname.replace(/^www\./, '');
+        //     console.log('domain:', domain);
+        //     const allowedDomain = this.allowedDomains.find(d => d.url === domain);
+        //     console.log('allowedDomain:', allowedDomain);
+        //     return allowedDomain && allowedDomain.scrappable;
+        // });
 
-        console.log('scrappableUrls:', scrappableUrls);
+        console.log('scrappableUrls:', urls);
 
-        const scrapePromises = scrappableUrls.map(async url => {
+        const scrapePromises = urls.map(async url => {
             try {
-                const scrapeResult = await this.firecrawlApp.scrapeUrl(url, {
-                    formats: ['markdown'],
-                });
+                const htmlSite = await fetch(url);
 
-                if (scrapeResult && scrapeResult.markdown) {
+                if (!htmlSite.ok) {
+                    throw new Error(`Fetch Response status: ${htmlSite.status}`);
+                }
+
+                const content = await htmlSite.text();
+                const $ = load(content);
+
+                const markdown = this.nhm.translate($.html());
+
+                if (content && markdown) {
                     // console.log('scrapeResult:', scrapeResult);
-                    return { url, content: scrapeResult.markdown };
+                    return { url, content: markdown };
                 } else {
                     console.warn(`No markdown content found for URL: ${url}`);
                     return { url, content: '' };

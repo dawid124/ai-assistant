@@ -1,25 +1,15 @@
-import type { IntentName, Slot } from '../../controler/mqtt/types.ts';
-import { EActionType } from '../intent/Intent.interface.ts';
-import type { EIntentType } from '../tools/prompt/tepes.ts';
+import { type MessageHistory } from '../intent/Intent.interface.ts';
+import { ETaskStatus } from '../intent/Context.interface.ts';
 
-export interface AppIntent {
-    intent: IntentName;
-    slots: Slot[];
+export interface CachedSessionContext {
+    tasks: CachedTask[];
 }
 
-export interface CachedAssistantAction {
-    type: EActionType;
-    intent?: AppIntent;
-    cached: true;
-    output?: string;
-    notRecognized?: true;
-}
-
-export interface CachedIntentType {
-    id: string;
-    score: number;
-    payload: {
-        text: string;
-        type: EIntentType;
-    };
+export interface CachedTask {
+    tool: string;
+    query: string;
+    status: ETaskStatus;
+    messages: MessageHistory[];
+    data?: object | string;
+    cached?: boolean;
 }

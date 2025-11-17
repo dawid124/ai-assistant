@@ -1,4 +1,5 @@
 import type { Intent, Query } from '../../controler/mqtt/types.ts';
+import type { SessionContext } from './Context.interface.ts';
 
 export type RecognizeType = (msg: Query) => Promise<AssistantAction>;
 
@@ -7,8 +8,8 @@ export interface AssistantAction {
     sessionId: string;
     type: EActionType;
 
-    history?: MessageHistory[];
-    intent?: Intent;
+    customData?: SessionContext;
+    intents?: Intent[];
 
     input?: string;
     output?: string;
@@ -30,14 +31,13 @@ export enum EAssistantRole {
 
 export enum EMessageType {
     USER_REQUESTED = 'USER_REQUESTED',
+    COMPLETED = 'COMPLETED',
     INTENT_NOT_RECOGNIZED = 'INTENT_NOT_RECOGNIZED',
-    INTENT_RECOGNIZED = 'INTENT_RECOGNIZED',
+    AI_QUESTION = 'AI_QUESTION',
 }
 
 export enum EActionType {
-    SMART_HOME_ACTION_REDIRECT = 'SMART_HOME_ACTION_REDIRECT',
     CONTINUE_SESSION = 'CONTINUE_SESSION',
     END_SESSION_POSITIVE = 'END_SESSION_POSITIVE',
     END_SESSION_NEGATIVE = 'END_SESSION_NEGATIVE',
-    NEED_CONFIRMATION = 'NEED_CONFIRMATION',
 }

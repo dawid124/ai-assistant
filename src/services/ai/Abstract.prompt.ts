@@ -1,8 +1,8 @@
-import OpenAIService, { EModel, type openAiResponseType } from '../../ai/OpenAI.service.ts';
+import OpenAIService, { EModel, type openAiResponseType } from './OpenAI.service.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import OpenAI from 'openai';
 
-export abstract class AbstractPromptService {
+export abstract class AbstractPrompt {
     protected async askOpenAI(
         model: EModel,
         messages: ChatCompletionMessageParam[],

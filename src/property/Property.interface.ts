@@ -1,5 +1,6 @@
-export interface IProperty {
+export interface claudeIProperty {
     port: number;
+    user: IUserProps;
     mqtt: IMqttProps;
     openapi: IOpenApiProps;
     qdrant: IQdrantProps;
@@ -7,6 +8,10 @@ export interface IProperty {
     libs: { friecrawlApiKey: string };
     cache: ICacheProps;
     databasePath: string;
+}
+
+export interface IUserProps {
+    location: string;
 }
 
 export interface IMqttProps {
@@ -47,6 +52,7 @@ export interface IQdrantProps {
 
 export interface IIntentProps {
     pleaseRepeat: string;
+    smartHomeUrl: string;
     endSentences: string[];
     intentTypeApiModel: string;
     aiAnswerTypeApiModel: string;

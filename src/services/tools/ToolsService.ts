@@ -1,19 +1,23 @@
 import type { Query } from '../../controler/mqtt/types.ts';
-import { notRecognized, type ToolAbstract } from './Abstract.tool.ts';
-import { type AssistantAction } from '../intent/Intent.interface.ts';
-import { EndSessionNegative } from '../intent/Action.interface.ts';
-import { SmartHomeTool } from './implementation/SmartHome.tool.ts';
-import { AiQuestionTool } from './implementation/AiQuestion.tool.ts';
-import { WebSearchTool } from './implementation/WebSearch.tool.ts';
-import { NotRecognizedTool } from './implementation/NotRecognized.tool.ts';
+import { type ToolAbstract } from './implementation/Abstract.tool.ts';
+import { ETaskStatus, type Task } from '../intent/Context.interface.ts';
+import NotRecognizedTool from './implementation/not-recognized/NotRecognized.tool.ts';
+import AiQuestionTool from './implementation/ai-qustion/AiQuestion.tool.ts';
+import SendTelegramTool from './implementation/send-telegram/SendTelegram.tool.ts';
+import ShowOnTvTool from './implementation/show-on-tv/ShowOnTv.tool.ts';
+import SmartHomeTool from './implementation/smart-home/SmartHome.tool.ts';
+import WebSearchTool from './implementation/web-search/WebSearch.tool.ts';
 
 export class ToolsServiceClass {
     private _tools: Record<string, ToolAbstract>;
     private _toolsDescription: Record<string, string>;
 
-    constructor() {
+    constructor(toolsClasses: ToolAbstract[]) {
         this._tools = {};
         this._toolsDescription = {};
+        toolsClasses.forEach(tool => {
+            tool.init(this);
+        });
     }
 
     addTool(toolName: string, description: string, tool: ToolAbstract): void {
@@ -21,17 +25,18 @@ export class ToolsServiceClass {
         this._toolsDescription[toolName] = description;
     }
 
-    async doAction(toolName: string, query: Query): Promise<AssistantAction> {
-        const tool = this._tools[toolName];
+    async doAction(task: Task, query: Query): Promise<void> {
+        const tool = this._tools[task.tool];
         if (tool) {
             try {
-                return await tool.doAction(query);
+                await tool.doAction(task, query);
             } catch (ex) {
-                return notRecognized(query);
+                task.status = ETaskStatus.TERMINATED;
             }
         } else {
-            console.error(`Tool ${toolName} not found. Input: ${query.input}`);
-            return EndSessionNegative(query, 'Akcja nie została jeszcze zaimplementowana');
+            console.error(`Tool ${task.tool} not found. Input: ${query.input}`);
+            task.status = ETaskStatus.TERMINATED;
+            task.say = 'Wybrane narzędzie nie jest jeszcze zaimplementowane';
         }
     }
 
@@ -40,11 +45,11 @@ export class ToolsServiceClass {
     }
 }
 
-const toolsService = new ToolsServiceClass();
-
-new SmartHomeTool(toolsService);
-new AiQuestionTool(toolsService);
-new WebSearchTool(toolsService);
-new NotRecognizedTool(toolsService);
-
-export default toolsService;
+export default new ToolsServiceClass([
+    NotRecognizedTool,
+    SmartHomeTool,
+    AiQuestionTool,
+    WebSearchTool,
+    SendTelegramTool,
+    ShowOnTvTool,
+]);

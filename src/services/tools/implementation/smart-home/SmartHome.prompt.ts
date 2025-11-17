@@ -1,12 +1,12 @@
-import { AiAPIType } from '../../ai/OpenAi.interface.ts';
-import envProps from '../../../property/Property.manager.ts';
-import { EModel } from '../../ai/OpenAI.service.ts';
-import { AbstractPromptService } from './AbstractPrompt.service.ts';
+import { AiAPIType } from '../../../ai/OpenAi.interface.ts';
+import envProps from '../../../../property/Property.manager.ts';
+import { EModel } from '../../../ai/OpenAI.service.ts';
+import { AbstractPrompt } from '../../../ai/Abstract.prompt.ts';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { EAssistantRole, type MessageHistory } from '../../intent/Intent.interface.ts';
-import UserDataService, { UserDataServiceClass } from '../../data/UserData.service.ts';
+import { EAssistantRole, type MessageHistory } from '../../../intent/Intent.interface.ts';
+import UserDataService, { UserDataServiceClass } from '../../../data/UserData.service.ts';
 
-class SmartHomePromptService extends AbstractPromptService {
+export class SmartHomePromptClass extends AbstractPrompt {
     private _userDataService: UserDataServiceClass;
 
     constructor(userDataService: UserDataServiceClass) {
@@ -23,8 +23,7 @@ class SmartHomePromptService extends AbstractPromptService {
                 .map(item => ({ content: item.content, role: item.role })) || {}),
         ];
 
-        const aiAPIType: AiAPIType =
-            (envProps.intent.intentTypeApiModel as AiAPIType) || AiAPIType.GPT4_O_MINI;
+        const aiAPIType: AiAPIType = (envProps.intent.intentTypeApiModel as AiAPIType) || AiAPIType.GPT4_O_MINI;
         switch (aiAPIType) {
             case AiAPIType.GPT4_O_MINI:
                 return this.askOpenAI(EModel.gpt4oMini, messages, { type: 'json_object' });
@@ -35,23 +34,20 @@ class SmartHomePromptService extends AbstractPromptService {
         }
     }
 
-    private createMessage = (question: string): ChatCompletionMessageParam => {
-        return { content: question, role: 'user' };
-    };
-
     private createSystemPrompt = (): ChatCompletionMessageParam => {
         return {
             role: 'system',
             content: `
-[Convert TTS Whisper Text to Smart Home JSON Commands]
+[Convert STT Whisper Text to Smart Home JSON Commands]
 
 <prompt_objective>
-Konwersja tekstu pobranego z TTS Whisper na akcje smart home w formacie JSON, zgodnie z ustaloną składnią.
+Konwersja tekstu pobranego z STT Whisper na akcje smart home w formacie JSON, zgodnie z ustaloną składnią.
 </prompt_objective>
 
 <prompt_rules>
-- Odpowiadaj wyłącznie w formacie JSON: { "intentName": "<wybrana akcja>", "slots": [ {"entity": "<nazwa_wartości>", "value": { "value": <wartości> } }, ... ]}
+- Odpowiadaj wyłącznie w formacie JSON: { "_thinking": string, "intentName": string, "slots": [ {"entity": string, "value": { "value": string | number } }, ... ]}
 - Rozpoznaj i popraw literówki w tekście przed dokonaniem konwersji.
+- ENSURE the "_thinking" field explains the analysis and reasoning process
 - Poprawnie mapuj tekst na zapisy JSGF. Składnia JSGF jest obowiązkowa dla dopasowań.
 - Podczas rozpoznawania, jeśli tekst nie pasuje do żadnej z kategorii, zwróć: { "intentName": "NotRecognized",  "slots": [] }
 - Jeśli wykryta jest niepełna lub niejednoznaczna komenda, podaj jak najbardziej zbliżoną, zgodną z JSGF akcję.
@@ -72,4 +68,4 @@ Upewnij się, że format JSON jest odpowiednio dostosowany, zgodnie z powyższym
     };
 }
 
-export default new SmartHomePromptService(UserDataService);
+export default new SmartHomePromptClass(UserDataService);
